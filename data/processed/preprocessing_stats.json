@@ -1,0 +1,22 @@
+{
+  "raw_pairs": 26872,
+  "dropped_null": 0,
+  "dropped_automated": 0,
+  "placeholder_types": 43,
+  "dropped_duplicate_pairs": 0,
+  "dropped_too_short": 5,
+  "dropped_over_represented": 623,
+  "pairs_after_cleaning": 26244,
+  "truncated_responses": 8942,
+  "mean_query_tokens": 8.81,
+  "mean_response_tokens": 91.51,
+  "split_sizes": {
+    "train": 20967,
+    "valid": 2650,
+    "test": 2627
+  },
+  "vocab_size": 3901,
+  "token_coverage": 0.9987,
+  "min_freq": 2,
+  "scope_query_vocab": 1035
+}

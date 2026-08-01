@@ -1,0 +1,18 @@
+ticket_id,channel,query
+T-1001,email,I want to cancel order 4471902 because I ordered the wrong size
+T-1002,chat,How do I get a refund for my last purchase?
+T-1003,chat,I forgot my password and I cannot sign in to my account
+T-1004,email,Where is my package? It has not arrived yet and it is already late
+T-1005,chat,Can you tell me what your customer service hours are?
+T-1006,phone,I need to talk to a human agent please
+T-1007,email,How do I change the shipping address on my order?
+T-1008,email,There is a wrong charge on my invoice 88231
+T-1009,chat,I would like to upgrade my account to a premium account
+T-1010,chat,how can i delete my account
+T-1011,chat,pls help me track my parcel AB-99213
+T-1012,email,I want to leave feedback about your product
+T-1013,chat,What payment methods do you accept?
+T-1014,chat,i need to modify my order before it ships
+T-1015,email,How long does a refund take to appear on my card?
+T-1016,chat,What is the boiling point of water on Mars?
+T-1017,chat,Write me a python function that reverses a string

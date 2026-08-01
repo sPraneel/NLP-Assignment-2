@@ -1,0 +1,135 @@
+/Users/spraneel/Desktop/Cyber security/NLP/.venv/lib/python3.9/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+==============================================================================
+Training configuration
+  arch               transformer
+  vocab_size         3901
+  device             mps
+  batch_size         64
+  epochs             25
+  lr                 0.0005
+  weight_decay       0.0001
+  label_smoothing    0.1
+  clip_norm          1.0
+  warmup_steps       400
+  patience           4
+  max_src_len        32
+  max_tgt_len        120
+  parameters         4957245
+  train_pairs        20967
+  valid_pairs        2650
+  test_pairs         2627
+  d_model            256
+  n_heads            4
+  enc_layers         3
+  dec_layers         3
+  ffn_dim            512
+  dropout            0.1
+==============================================================================
+    e1 step   50/328  loss 7.9812  14003 tok/s
+    e1 step  100/328  loss 7.4538  13695 tok/s
+    e1 step  150/328  loss 6.9864  13967 tok/s
+    e1 step  200/328  loss 6.6309  13797 tok/s
+    e1 step  250/328  loss 6.2609  13771 tok/s
+    e1 step  300/328  loss 5.9210  13674 tok/s
+epoch  1/25  train 5.7496  valid 2.9494  ppl 19.09  (146s)
+           new best -> models/best_model.pt
+    e2 step   50/328  loss 3.6644  15176 tok/s
+    e2 step  100/328  loss 3.5209  14523 tok/s
+    e2 step  150/328  loss 3.4127  14337 tok/s
+    e2 step  200/328  loss 3.3226  14108 tok/s
+    e2 step  250/328  loss 3.2489  14126 tok/s
+    e2 step  300/328  loss 3.1799  14281 tok/s
+epoch  2/25  train 3.1459  valid 1.6858  ppl 5.40  (140s)
+           new best -> models/best_model.pt
+    e3 step   50/328  loss 2.7180  16050 tok/s
+    e3 step  100/328  loss 2.6988  16030 tok/s
+    e3 step  150/328  loss 2.6732  15900 tok/s
+    e3 step  200/328  loss 2.6521  15833 tok/s
+    e3 step  250/328  loss 2.6320  15847 tok/s
+    e3 step  300/328  loss 2.6126  15863 tok/s
+epoch  3/25  train 2.6030  valid 1.3652  ppl 3.92  (127s)
+           new best -> models/best_model.pt
+    e4 step   50/328  loss 2.4553  15851 tok/s
+    e4 step  100/328  loss 2.4476  15605 tok/s
+    e4 step  150/328  loss 2.4411  15483 tok/s
+    e4 step  200/328  loss 2.4323  15668 tok/s
+    e4 step  250/328  loss 2.4218  15691 tok/s
+    e4 step  300/328  loss 2.4154  15830 tok/s
+epoch  4/25  train 2.4119  valid 1.2233  ppl 3.40  (126s)
+           new best -> models/best_model.pt
+    e5 step   50/328  loss 2.3311  16776 tok/s
+    e5 step  100/328  loss 2.3292  16617 tok/s
+    e5 step  150/328  loss 2.3262  16175 tok/s
+    e5 step  200/328  loss 2.3220  15945 tok/s
+    e5 step  250/328  loss 2.3175  15974 tok/s
+    e5 step  300/328  loss 2.3135  16022 tok/s
+epoch  5/25  train 2.3089  valid 1.1512  ppl 3.16  (126s)
+           new best -> models/best_model.pt
+    e6 step   50/328  loss 2.2549  15608 tok/s
+    e6 step  100/328  loss 2.2557  15902 tok/s
+    e6 step  150/328  loss 2.2530  15958 tok/s
+    e6 step  200/328  loss 2.2526  15983 tok/s
+    e6 step  250/328  loss 2.2477  15951 tok/s
+    e6 step  300/328  loss 2.2438  16028 tok/s
+epoch  6/25  train 2.2415  valid 1.0983  ppl 3.00  (126s)
+           new best -> models/best_model.pt
+    e7 step   50/328  loss 2.2062  14362 tok/s
+    e7 step  100/328  loss 2.1954  15104 tok/s
+    e7 step  150/328  loss 2.1923  15266 tok/s
+    e7 step  200/328  loss 2.1941  14697 tok/s
+    e7 step  250/328  loss 2.1931  14561 tok/s
+    e7 step  300/328  loss 2.1933  14568 tok/s
+epoch  7/25  train 2.1928  valid 1.0593  ppl 2.88  (137s)
+           new best -> models/best_model.pt
+    e8 step   50/328  loss 2.1503  14367 tok/s
+    e8 step  100/328  loss 2.1539  14582 tok/s
+    e8 step  150/328  loss 2.1530  14224 tok/s
+    e8 step  200/328  loss 2.1557  14565 tok/s
+    e8 step  250/328  loss 2.1565  14597 tok/s
+    e8 step  300/328  loss 2.1568  14542 tok/s
+epoch  8/25  train 2.1558  valid 1.0317  ppl 2.81  (139s)
+           new best -> models/best_model.pt
+    e9 step   50/328  loss 2.1187  15359 tok/s
+    e9 step  100/328  loss 2.1234  15636 tok/s
+    e9 step  150/328  loss 2.1260  15670 tok/s
+    e9 step  200/328  loss 2.1263  15096 tok/s
+    e9 step  250/328  loss 2.1253  15076 tok/s
+    e9 step  300/328  loss 2.1255  15273 tok/s
+epoch  9/25  train 2.1256  valid 1.0109  ppl 2.75  (130s)
+           new best -> models/best_model.pt
+    e10 step   50/328  loss 2.1101  15728 tok/s
+    e10 step  100/328  loss 2.1043  15887 tok/s
+    e10 step  150/328  loss 2.1052  16046 tok/s
+    e10 step  200/328  loss 2.1038  16089 tok/s
+    e10 step  250/328  loss 2.1012  16005 tok/s
+    e10 step  300/328  loss 2.1022  16123 tok/s
+epoch 10/25  train 2.1011  valid 0.9943  ppl 2.70  (124s)
+           new best -> models/best_model.pt
+    e11 step   50/328  loss 2.0872  16392 tok/s
+    e11 step  100/328  loss 2.0762  16385 tok/s
+    e11 step  150/328  loss 2.0785  16293 tok/s
+    e11 step  200/328  loss 2.0775  16408 tok/s
+    e11 step  250/328  loss 2.0792  16451 tok/s
+    e11 step  300/328  loss 2.0806  16418 tok/s
+epoch 11/25  train 2.0804  valid 0.9821  ppl 2.67  (122s)
+           new best -> models/best_model.pt
+    e12 step   50/328  loss 2.0631  16448 tok/s
+    e12 step  100/328  loss 2.0614  16575 tok/s
+    e12 step  150/328  loss 2.0601  16659 tok/s
+    e12 step  200/328  loss 2.0620  16514 tok/s
+    e12 step  250/328  loss 2.0624  16588 tok/s
+    e12 step  300/328  loss 2.0618  16343 tok/s
+epoch 12/25  train 2.0623  valid 0.9661  ppl 2.63  (123s)
+           new best -> models/best_model.pt
+    e13 step   50/328  loss 2.0385  15909 tok/s
+    e13 step  100/328  loss 2.0406  16097 tok/s
+    e13 step  150/328  loss 2.0397  16101 tok/s
+    e13 step  200/328  loss 2.0428  15193 tok/s
+    e13 step  250/328  loss 2.0455  14790 tok/s
+    e13 step  300/328  loss 2.0466  14684 tok/s
+epoch 13/25  train 2.0468  valid 0.9547  ppl 2.60  (136s)
+           new best -> models/best_model.pt
+    e14 step   50/328  loss 2.0304  12768 tok/s
+    e14 step  100/328  loss 2.0362  13249 tok/s
+    e14 step  150/328  loss 2.0359  13953 tok/s

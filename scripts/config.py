@@ -11,27 +11,28 @@ import os
 # --------------------------------------------------------------------------- #
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Everything the project reads or writes lives in the single ``data/`` folder,
+# so the notebook, the app and these scripts always agree on where a file is.
 DATA_DIR = os.path.join(ROOT_DIR, "data")
-RAW_DIR = os.path.join(DATA_DIR, "raw")
-PROCESSED_DIR = os.path.join(DATA_DIR, "processed")
-MODEL_DIR = os.path.join(ROOT_DIR, "models")
-REPORT_DIR = os.path.join(ROOT_DIR, "reports")
-SAMPLE_DIR = os.path.join(ROOT_DIR, "samples")
+MODEL_DIR = DATA_DIR
+REPORT_DIR = DATA_DIR
+SAMPLE_DIR = DATA_DIR
+SCREENSHOT_DIR = os.path.join(DATA_DIR, "screenshots")
 
-RAW_CSV = os.path.join(RAW_DIR, "bitext_customer_support_27k.csv")
+RAW_CSV = os.path.join(DATA_DIR, "bitext_customer_support_27k.csv")
 
-TRAIN_CSV = os.path.join(PROCESSED_DIR, "train.csv")
-VALID_CSV = os.path.join(PROCESSED_DIR, "valid.csv")
-TEST_CSV = os.path.join(PROCESSED_DIR, "test.csv")
-VOCAB_JSON = os.path.join(PROCESSED_DIR, "vocab.json")
-PLACEHOLDER_JSON = os.path.join(PROCESSED_DIR, "placeholder_map.json")
-SCOPE_LEXICON_JSON = os.path.join(PROCESSED_DIR, "scope_lexicon.json")
-STATS_JSON = os.path.join(PROCESSED_DIR, "preprocessing_stats.json")
+TRAIN_CSV = os.path.join(DATA_DIR, "train.csv")
+VALID_CSV = os.path.join(DATA_DIR, "valid.csv")
+TEST_CSV = os.path.join(DATA_DIR, "test.csv")
+VOCAB_JSON = os.path.join(DATA_DIR, "vocab.json")
+PLACEHOLDER_JSON = os.path.join(DATA_DIR, "placeholder_map.json")
+SCOPE_LEXICON_JSON = os.path.join(DATA_DIR, "scope_lexicon.json")
+STATS_JSON = os.path.join(DATA_DIR, "preprocessing_stats.json")
 
-CHECKPOINT = os.path.join(MODEL_DIR, "best_model.pt")
-HISTORY_JSON = os.path.join(MODEL_DIR, "history.json")
-LOSS_CURVE_PNG = os.path.join(REPORT_DIR, "loss_curve.png")
-METRICS_JSON = os.path.join(REPORT_DIR, "metrics.json")
+CHECKPOINT = os.path.join(DATA_DIR, "best_model.pt")
+HISTORY_JSON = os.path.join(DATA_DIR, "history.json")
+LOSS_CURVE_PNG = os.path.join(DATA_DIR, "loss_curve.png")
+METRICS_JSON = os.path.join(DATA_DIR, "metrics.json")
 
 # --------------------------------------------------------------------------- #
 # Special tokens

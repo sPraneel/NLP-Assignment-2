@@ -8,14 +8,13 @@ Source  : https://huggingface.co/datasets/bitext/Bitext-customer-support-llm-cha
 Licence : Community Data License Agreement - Sharing, Version 1.0 (CDLA-Sharing-1.0)
 
 If the machine has no internet access, download the CSV manually from the page
-above and save it as  data/raw/bitext_customer_support_27k.csv
+above and save it as  data/bitext_customer_support_27k.csv
 """
 
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(
-    os.path.abspath(__file__))), "src"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import config as C  # noqa: E402
 
@@ -27,7 +26,7 @@ EXPECTED_ROWS = 26872
 
 
 def main():
-    os.makedirs(C.RAW_DIR, exist_ok=True)
+    os.makedirs(C.DATA_DIR, exist_ok=True)
     if os.path.exists(C.RAW_CSV):
         print("Already present: {}".format(C.RAW_CSV))
         return

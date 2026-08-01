@@ -39,19 +39,19 @@ def main():
     args = p.parse_args()
 
     run("download dataset", [PY, "scripts/download_dataset.py"])
-    run("preprocess", [PY, "src/preprocess.py"])
+    run("preprocess", [PY, "scripts/preprocess.py"])
 
-    train_cmd = [PY, "src/train.py", "--arch", args.arch]
+    train_cmd = [PY, "scripts/train.py", "--arch", args.arch]
     if args.quick:
         train_cmd += ["--epochs", "3"]
     run("train", train_cmd)
 
-    eval_cmd = [PY, "src/evaluate.py", "--limit", "100" if args.quick else "400",
+    eval_cmd = [PY, "scripts/evaluate.py", "--limit", "100" if args.quick else "400",
                 "--strategy", "beam" if args.quick else "both"]
     run("evaluate", eval_cmd)
 
     print("\nAll done. Start the web application with:\n")
-    print("    streamlit run app/app.py\n")
+    print("    streamlit run app.py\n")
 
 
 if __name__ == "__main__":

@@ -9,10 +9,10 @@ Reports, on the held-out test split:
     failure mode that seq2seq chatbots are known for
   * the out-of-scope gate's behaviour on in-domain vs out-of-domain queries
 
-It also writes ``reports/manual_rating_sheet.csv``, a random sample for the
+It also writes ``data/manual_rating_sheet.csv``, a random sample for the
 manual relevance rating the assignment asks for.
 
-Run:  python src/evaluate.py --limit 400
+Run:  python scripts/evaluate.py --limit 400
 """
 
 import argparse

@@ -2,9 +2,9 @@
 
 Examples
 --------
-python src/train.py                                  # Transformer, defaults
-python src/train.py --arch lstm_attn --epochs 20     # LSTM + Bahdanau attention
-python src/train.py --epochs 2 --limit-batches 20    # smoke test
+python scripts/train.py                                  # Transformer, defaults
+python scripts/train.py --arch lstm_attn --epochs 20     # LSTM + Bahdanau attention
+python scripts/train.py --epochs 2 --limit-batches 20    # smoke test
 """
 
 import argparse

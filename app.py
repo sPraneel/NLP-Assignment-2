@@ -2,7 +2,7 @@
 
 Launch from the project root with:
 
-    streamlit run app/app.py
+    streamlit run app.py
 
 The app has two modes:
   * Chat        - single-turn chat interface that keeps the transcript on screen.
@@ -18,8 +18,8 @@ import time
 import pandas as pd
 import streamlit as st
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
+ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(ROOT, "scripts"))
 
 import config as C                       # noqa: E402
 from decode import ResponseGenerator     # noqa: E402
@@ -64,8 +64,8 @@ def sidebar():
 
     ckpts = checkpoint_options()
     if not ckpts:
-        st.sidebar.error("No checkpoint found in `models/`.\n\n"
-                         "Run `python src/train.py` first.")
+        st.sidebar.error("No checkpoint found in `data/`.\n\n"
+                         "Run `python scripts/train.py` first.")
         st.stop()
     default = C.CHECKPOINT if C.CHECKPOINT in ckpts else ckpts[0]
     checkpoint = st.sidebar.selectbox(
@@ -209,10 +209,10 @@ def batch_tab(gen, opts):
                "with a column of queries. Every row is answered by the same model.")
 
     uploaded = st.file_uploader("Query file", type=["txt", "csv"])
-    sample_dir = os.path.join(C.ROOT_DIR, "samples")
-    if os.path.isdir(sample_dir):
-        st.caption("Sample files for testing live in `samples/`: " +
-                   ", ".join(sorted(os.listdir(sample_dir))))
+    samples = sorted(f for f in os.listdir(C.DATA_DIR)
+                     if f.startswith("sample_queries"))
+    if samples:
+        st.caption("Sample files for testing live in `data/`: " + ", ".join(samples))
     if uploaded is None:
         return
 

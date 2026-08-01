@@ -4,7 +4,7 @@ Reads the raw Bitext customer-support corpus, cleans and normalises both sides
 of every query/response pair, removes automated and duplicate messages, builds a
 shared word-level vocabulary and writes leakage-free train/valid/test splits.
 
-Run:  python src/preprocess.py
+Run:  python scripts/preprocess.py
 """
 
 import argparse
@@ -30,7 +30,12 @@ RE_URL = re.compile(r"(https?://\S+|www\.\S+)", re.I)
 RE_EMAIL = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b")
 RE_USERNAME = re.compile(r"(?<![\w])@\w{2,}")
 RE_HASHTAG = re.compile(r"(?<![\w])#(\w+)")
-RE_HTML = re.compile(r"<[^<>]{1,40}>")
+# Strips markup, but never the typed tokens this pipeline itself introduces -
+# without the lookahead, running the cleaner over already-processed text (as the
+# evaluation script does, since the splits are stored tokenised) would silently
+# delete every <ph_...> slot.
+RE_HTML = re.compile(
+    r"<(?!/?(?:ph_[a-z0-9_]*|url|email|user|num|unk|pad|sos|eos)>)[^<>]{1,40}>")
 RE_NUMBER = re.compile(r"(?<![\w<])\d[\d,.\-/]*\d|(?<![\w<])\d(?![\w>])")
 RE_MULTISPACE = re.compile(r"\s+")
 RE_REPEAT_CHAR = re.compile(r"(.)\1{2,}")          # "heyyyy" -> "heyy"
@@ -169,37 +174,58 @@ def tokenize(text: str) -> List[str]:
     return RE_TOKEN.findall(text)
 
 
-def normalise_query_numbers(text: str) -> str:
-    """Replace bare reference numbers typed by a customer with the matching slot.
+RE_REF_NUMBER = re.compile(r"^[#-]?\d[\d\-]*$")
+MIN_REF_DIGITS = 4          # "30 days" and "24/7" must survive untouched
 
-    In the corpus every identifier is already a ``{{...}}`` slot, so a live query
-    such as "where is my order 4471902" would otherwise produce an out-of-
-    vocabulary token and look out of scope. We map long digit runs onto the slot
-    implied by the surrounding words, and leave short numbers ("30 days",
-    "24/7") untouched.
+
+def reference_slot(context: str) -> str:
+    """Which placeholder a bare identifier in this query most likely denotes."""
+    lowered = context.lower()
+    if re.search(r"\b(invoice|bill|billing)", lowered):
+        return "<ph_invoice_number>"
+    if re.search(r"\b(track|tracking|shipment|parcel|package)", lowered):
+        return "<ph_tracking_number>"
+    if re.search(r"\b(refund|reimburse|money back)", lowered):
+        return "<ph_refund_amount>"
+    return "<ph_order_number>"
+
+
+def slot_reference_numbers(tokens: List[str], context: str) -> List[str]:
+    """Replace bare reference numbers with the placeholder they stand for.
+
+    In the corpus every identifier is normally a ``{{...}}`` slot, so a live
+    query such as "where is my order 4471902" would otherwise become an
+    out-of-vocabulary token and look out of scope. Working on the **token**
+    stream rather than the raw string matters: the corpus also contains
+    identifiers glued to the preceding word ("cancel purchase370795561790"),
+    which only separate once the tokeniser has run.
+
+    It also makes re-processing an already-processed query - which the
+    evaluation script does, because the splits are stored tokenised - a no-op
+    for all but 3 of the 26,244 pairs. (Those three end in a chat-speak word
+    glued to punctuation, "user info?", which the whitespace-based chat-speak
+    pass cannot see until after tokenisation.)
     """
-    lowered = text.lower()
-    if re.search(r"\b(invoice|bill|billing)\b", lowered):
-        slot = "<ph_invoice_number>"
-    elif re.search(r"\b(track|tracking|shipment|parcel|package)\b", lowered):
-        slot = "<ph_tracking_number>"
-    elif re.search(r"\b(refund|reimburse|money back)\b", lowered):
-        slot = "<ph_refund_amount>"
-    else:
-        slot = "<ph_order_number>"
-    return re.sub(r"(?<![\w<])[#a-z]{0,2}[-_]?\d[\d\-]{3,}(?![\w>])",
-                  " " + slot + " ", text, flags=re.I)
+    slot = reference_slot(context)
+    out = []
+    for tok in tokens:
+        digits = sum(1 for ch in tok if ch.isdigit())
+        if digits >= MIN_REF_DIGITS and RE_REF_NUMBER.match(tok):
+            out.append(slot)
+        else:
+            out.append(tok)
+    return out
 
 
 def preprocess_query(text: str, mapping: Dict[str, str]) -> List[str]:
-    """Single entry point used by the live application (Task 4).
+    """Single entry point used by training *and* the live application (Task 4).
 
-    Applies exactly the same cleaning chain as training, plus chat-speak
-    normalisation and reference-number slotting, which only make sense on input
-    typed by a real customer.
+    Applies the cleaning chain, then chat-speak normalisation and
+    reference-number slotting, which only make sense on input typed by a real
+    customer.
     """
     cleaned = clean_text(text, mapping, normalise_chat=True)
-    return tokenize(normalise_query_numbers(cleaned))
+    return slot_reference_numbers(tokenize(cleaned), cleaned)
 
 
 def content_words(tokens: List[str]) -> List[str]:
@@ -353,7 +379,7 @@ def main():
                         help="debug option: only use the first N rows")
     args = parser.parse_args()
 
-    os.makedirs(C.PROCESSED_DIR, exist_ok=True)
+    os.makedirs(C.DATA_DIR, exist_ok=True)
     stats = {}
 
     print("[1/7] loading {}".format(args.raw))
@@ -443,7 +469,7 @@ def main():
         len(vocab), stats["token_coverage"]))
 
     vocab.save(C.VOCAB_JSON)
-    with open(os.path.join(C.PROCESSED_DIR, "placeholder_map.json"), "w",
+    with open(C.PLACEHOLDER_JSON, "w",
               encoding="utf-8") as fh:
         json.dump(mapping, fh, indent=1, ensure_ascii=False)
 

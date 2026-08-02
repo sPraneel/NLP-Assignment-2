@@ -10,71 +10,69 @@ lookup. Two interchangeable architectures are implemented — a Transformer
 encoder–decoder (default) and an LSTM encoder–decoder with Bahdanau attention.
 
 > **Course:** M.Tech. AIML — Natural Language Processing (S2-25_AIMLCZG530)
-> **Assignment 2, GS-3.** Group details are listed in `reports/report.md`.
+> **Assignment 2, GS-3.** Group details are listed at the top of the notebook.
 
 ---
 
 ## 1. Quick start
 
+Everything lives in **one notebook** and **one data folder**:
+
 ```bash
 # 1. Python 3.9 or newer (tested on 3.9.6 / 3.10 / 3.11 / 3.12)
-python3 --version
-
-# 2. Virtual environment
 python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
-
-# 3. Dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# 4. Dataset  (~18 MB, downloaded into data/raw/)
-python scripts/download_dataset.py
-
-# 5. Preprocess  (~30 s)
-python src/preprocess.py
-
-# 6. Train  (~55 min on an Apple M1 / ~15 min on a CUDA GPU)
-python src/train.py
-
-# 7. Evaluate  (~5 min)
-python src/evaluate.py --limit 400 --strategy both
-
-# 8. Smoke test  (~15 s) — verifies artefacts, decoding and the scope gate
-python scripts/selftest.py
-
-# 9. Launch the web application
-streamlit run app/app.py
+# 2. Open the notebook and Run All
+jupyter lab customer_support_response_generation.ipynb
 ```
 
-The app opens at **http://localhost:8501**.
+The notebook is **self-contained**: it defines every function it uses inline and
+reads and writes nothing but `data/`. It does not import `app.py` or anything in
+`scripts/`. Three switches in its setup cell control how much is recomputed:
 
-If `models/best_model.pt` is shipped inside the ZIP you can skip steps 6 and
-go straight to step 8 — but you still need steps 4 and 5, because the app loads
-`data/processed/vocab.json` and `data/processed/placeholder_map.json`.
+| Switch | Default | Effect |
+|---|---|---|
+| `REBUILD_DATA` | `True` | rebuild the splits/vocabulary from the raw corpus (~1 min) |
+| `RETRAIN_MODEL` | `False` | reuse `data/best_model.pt`; `True` trains from scratch (~30 min on GPU/MPS) |
+| `RECOMPUTE_METRICS` | `False` | reuse `data/metrics.json` if it exists, otherwise evaluate (~5 min) |
 
-### One-command rebuild
+A full *Run All* with the defaults takes about three minutes.
+
+### The web application
 
 ```bash
-python scripts/run_all.py
+streamlit run app.py               # -> http://localhost:8501
 ```
 
-Runs download → preprocess → train → evaluate in sequence and then prints the
-command to start the app.
+It loads `data/best_model.pt` and answers exactly as the notebook does.
+
+### Command-line pipeline (optional)
+
+`scripts/` holds standalone copies of the same stages for people who prefer a
+terminal. **The notebook never needs them.**
+
+```bash
+python scripts/download_dataset.py                        # fetch the raw corpus
+python scripts/preprocess.py                              # ~30 s
+python scripts/train.py --arch transformer --epochs 25    # ~55 min on an M1
+python scripts/evaluate.py --limit 400 --strategy both    # ~5 min
+python scripts/run_all.py                                 # all four in order
+python scripts/build_notebook.py                          # regenerate the notebook
+```
 
 ### Running it on the BITS OSHA virtual lab
 
-The project has no OS-specific dependencies; every path in `src/config.py` is
-derived from the repository root, so it runs unchanged in the lab. Two practical
-notes:
+The project has no OS-specific dependencies; every path is derived from the
+project folder, so it runs unchanged in the lab. Two practical notes:
 
-* **Training on CPU.** `src/data.py` picks CUDA → MPS → CPU automatically. On a
-  CPU-only lab machine a full 25-epoch run takes a few hours, so either train
-  with fewer epochs (`python src/train.py --epochs 8`, which already reaches a
-  usable perplexity) or use the `models/best_model.pt` shipped in the ZIP and go
-  straight to `streamlit run app/app.py`.
+* **Training on CPU.** The device is picked automatically (CUDA → MPS → CPU). On
+  a CPU-only machine a 25-epoch run takes a few hours, so leave
+  `RETRAIN_MODEL = False` and use the shipped `data/best_model.pt`.
 * **Port forwarding.** If the lab exposes a different port, start the app with
-  `streamlit run app/app.py --server.port <PORT> --server.address 0.0.0.0`.
+  `streamlit run app.py --server.port <PORT> --server.address 0.0.0.0`.
 
 ---
 
@@ -94,9 +92,9 @@ This matches the dataset description in the problem statement: a dialogue corpus
 of query–response pairs, in the 10 k–1 L range, with optional intent/category
 metadata.
 
-After preprocessing: **20,999 train / 2,642 validation / 2,626 test** pairs and a
-**3,934-type** shared vocabulary covering 99.88 % of all running tokens. Exact
-counts are written to `data/processed/preprocessing_stats.json`.
+After preprocessing: **20,967 train / 2,650 validation / 2,627 test** pairs and a
+**3,901-type** shared vocabulary covering 99.87 % of all running tokens. Exact
+counts are written to `data/preprocessing_stats.json`.
 
 ---
 
@@ -104,52 +102,50 @@ counts are written to `data/processed/preprocessing_stats.json`.
 
 ```
 .
-├── app/
-│   └── app.py                     # Streamlit web application (Task 4)
-├── data/
-│   ├── raw/                       # downloaded corpus (git-ignored)
-│   └── processed/                 # splits, vocab.json, placeholder_map.json
-├── models/
-│   ├── best_model.pt              # trained Transformer checkpoint
-│   └── history.json               # per-epoch loss history
-├── notebooks/
-│   └── customer_support_response_generation.ipynb   # end-to-end walkthrough
-├── reports/
-│   ├── loss_curve.png             # training / validation curves
-│   ├── metrics.json               # BLEU, ROUGE, perplexity, scope gate
-│   ├── manual_rating_sheet.csv    # sheet for the human relevance rating
-│   ├── screenshots/               # application screenshots
-│   └── report.md                  # project report (Task 6)
-├── samples/
-│   ├── sample_queries.txt         # 17 queries, one per line
-│   └── sample_queries.csv         # same queries with ticket metadata
-├── scripts/
-│   ├── download_dataset.py        # fetch the raw corpus
-│   ├── run_all.py                 # download -> preprocess -> train -> evaluate
-│   ├── selftest.py                # 15-second end-to-end smoke test
-│   ├── capture_screenshots.py     # drive the running app, save PNGs
-│   ├── build_notebook.py          # regenerate the submission notebook
-│   ├── build_report.py            # report.md -> report.html -> Group<N>.pdf
-│   ├── make_submission_zip.py     # build Group<N>_Code.zip
-│   └── build_submission.py        # all of the above, in order
-├── src/
-│   ├── config.py                  # every path and hyper-parameter
-│   ├── vocab.py                   # word-level vocabulary
-│   ├── preprocess.py              # cleaning, normalisation, splits (Task 2)
-│   ├── data.py                    # Dataset / DataLoader / device selection
-│   ├── model.py                   # Transformer and LSTM+attention (Task 3.1)
-│   ├── train.py                   # training loop and loss curves (Task 3.2)
-│   ├── decode.py                  # greedy + beam search, scope gate (Task 3.3)
-│   └── evaluate.py                # BLEU / ROUGE / perplexity (Task 5.1)
+├── customer_support_response_generation.ipynb   # THE notebook - self-contained
+├── app.py                          # Streamlit web application (Task 4)
 ├── requirements.txt
-└── README.md
+├── README.md
+├── data/                           # the only folder the notebook touches
+│   ├── bitext_customer_support_27k.csv    # raw corpus (18 MB)
+│   ├── train.csv / valid.csv / test.csv   # cleaned, leakage-free splits
+│   ├── vocab.json                         # word-level vocabulary
+│   ├── placeholder_map.json               # {{Order Number}} -> <ph_order_number>
+│   ├── scope_lexicon.json                 # query-side lexicon for the scope gate
+│   ├── preprocessing_stats.json           # every count reported in Section 2
+│   ├── best_model.pt                      # trained Transformer checkpoint
+│   ├── history.json                       # per-epoch loss history
+│   ├── loss_curve.png                     # training / validation curves
+│   ├── metrics.json                       # BLEU, ROUGE, perplexity, scope gate
+│   ├── manual_rating_sheet.csv            # sheet for the human relevance rating
+│   ├── sample_queries.txt / .csv          # inputs for the batch tab
+│   └── screenshots/                       # application screenshots
+├── scripts/                        # optional CLI copies - the notebook needs none
+│   ├── config.py                   # paths and hyper-parameters
+│   ├── vocab.py                    # word-level vocabulary
+│   ├── preprocess.py               # cleaning, normalisation, splits (Task 2)
+│   ├── data.py                     # Dataset / DataLoader / device selection
+│   ├── model.py                    # Transformer and LSTM+attention (Task 3.1)
+│   ├── train.py                    # training loop and loss curves (Task 3.2)
+│   ├── decode.py                   # greedy + beam search, scope gate (Task 3.3)
+│   ├── evaluate.py                 # BLEU / ROUGE / perplexity (Task 5.1)
+│   ├── download_dataset.py         # fetch the raw corpus
+│   ├── run_all.py                  # download -> preprocess -> train -> evaluate
+│   └── build_notebook.py           # regenerate the notebook above
+└── reports/                        # previous write-up, kept for reference
+    ├── report.md / report.html / Group1.pdf
+    └── train_log_transformer.txt
 ```
+
+`app.py` imports from `scripts/`; the notebook imports from neither. The code is
+therefore duplicated once — deliberately, so that the notebook alone is a
+complete, runnable submission.
 
 ---
 
 ## 4. How it works
 
-### Preprocessing (`src/preprocess.py`)
+### Preprocessing (notebook §2.2 · `scripts/preprocess.py`)
 
 1. **Placeholder normalisation.** The corpus marks variable data as
    `{{Order Number}}`, `{{Account Type}}`, … Each of the 43 frequent slots
@@ -185,7 +181,7 @@ counts are written to `data/processed/preprocessing_stats.json`.
 9. A separate **scope lexicon** (`scope_lexicon.json`) is written from the
    training *queries* alone, and drives the out-of-scope gate at inference time.
 
-### Model (`src/model.py`)
+### Model (notebook §3.1 · `scripts/model.py`)
 
 | | Transformer (default) | LSTM + attention |
 |---|---|---|
@@ -195,15 +191,15 @@ counts are written to `data/processed/preprocessing_stats.json`.
 | Embeddings | 256-d, sinusoidal positions, tied with the output layer | 256-d, tied |
 | Parameters | ≈ 4.95 M | ≈ 7.9 M |
 
-### Training (`src/train.py`)
+### Training (notebook §3.2 · `scripts/train.py`)
 
 AdamW (lr 5e-4, β = 0.9/0.98, weight decay 1e-4), linear warm-up over 400 steps
 then cosine decay, label smoothing 0.1, gradient clipping at 1.0, batch size 64,
 early stopping on validation loss with patience 4. Perplexity is reported from an
 **unsmoothed** cross-entropy so `exp(loss)` is meaningful. Curves are written to
-`reports/loss_curve.png`.
+`data/loss_curve.png`.
 
-### Decoding and the out-of-scope gate (`src/decode.py`)
+### Decoding and the out-of-scope gate (notebook §3.3 · `scripts/decode.py`)
 
 * **Greedy** decoding (used for batch mode — it batches) and **beam search**
   with length-normalised scoring, `score = Σ log p / lengthᵃ`, `a = 0.7`.
@@ -217,7 +213,7 @@ early stopping on validation loss with patience 4. Perplexity is reported from a
   Signal 1 does the work. Measuring it against the *full* model vocabulary does
   not work, because that vocabulary also contains every word of every agent
   reply and makes almost any English sentence look familiar; the query-side
-  lexicon (`data/processed/scope_lexicon.json`, 1,050 words) is far tighter.
+  lexicon (`data/scope_lexicon.json`, 1,035 words) is far tighter.
   A refused query gets a hand-off message instead of an invented answer.
   Measured separation on the sample queries: in-domain content-OOV ≤ 0.33,
   out-of-domain ≥ 0.60.
@@ -231,8 +227,8 @@ each reply carries a *Diagnostics* panel showing the decoding strategy, mean
 log-probability, unknown-word ratio, the in/out-of-scope decision and the
 latency. The transcript can be downloaded as a `.txt`.
 
-**Batch / file upload tab** — upload `samples/sample_queries.txt` (one query per
-line) or `samples/sample_queries.csv` (pick the column holding the queries). The
+**Batch / file upload tab** — upload `data/sample_queries.txt` (one query per
+line) or `data/sample_queries.csv` (pick the column holding the queries). The
 app answers every row, shows a table with the scope flag and confidence per row,
 and offers the results as a downloadable CSV.
 
@@ -243,31 +239,33 @@ length, an on/off switch for the out-of-scope refusal, and a diagnostics toggle.
 
 ## 6. Reproducing the reported numbers
 
-```bash
-python src/preprocess.py                                   # deterministic (seed 42)
-python src/train.py --arch transformer --epochs 25         # the reported model
-python src/evaluate.py --limit 400 --strategy both
-```
-
-Every number in `reports/report.md` comes from the **Transformer** checkpoint.
-The LSTM + Bahdanau attention model is implemented and trains from the same
-command, but was not trained for the submission:
+Run the notebook with `RETRAIN_MODEL = True` and `RECOMPUTE_METRICS = True`, or
+from a terminal:
 
 ```bash
-python src/train.py --arch lstm_attn --epochs 15
-python src/evaluate.py --checkpoint models/best_model_lstm_attn.pt --limit 400
+python scripts/preprocess.py                               # deterministic (seed 42)
+python scripts/train.py --arch transformer --epochs 25     # the reported model
+python scripts/evaluate.py --limit 400 --strategy both
 ```
 
-Everything is seeded with `RANDOM_SEED = 42` in `src/config.py`. Small
-differences between machines are expected because cuDNN/MPS kernels are not
-bit-deterministic.
+Every reported number comes from the **Transformer** checkpoint. The LSTM +
+Bahdanau attention model is implemented and trains from the same command, but was
+not trained for the submission:
+
+```bash
+python scripts/train.py --arch lstm_attn --epochs 15
+python scripts/evaluate.py --checkpoint data/best_model_lstm_attn.pt --limit 400
+```
+
+Everything is seeded with `RANDOM_SEED = 42`. Small differences between machines
+are expected because cuDNN/MPS kernels are not bit-deterministic.
 
 Useful flags:
 
 ```bash
-python src/train.py --epochs 2 --limit-batches 20     # 1-minute smoke test
-python src/decode.py "i want to cancel my order"      # generate from the CLI
-python src/evaluate.py --strategy greedy --limit 200  # faster evaluation
+python scripts/train.py --epochs 2 --limit-batches 20     # 1-minute smoke test
+python scripts/decode.py "i want to cancel my order"      # generate from the CLI
+python scripts/evaluate.py --strategy greedy --limit 200  # faster evaluation
 ```
 
 ---
@@ -295,7 +293,7 @@ python src/evaluate.py --strategy greedy --limit 200  # faster evaluation
 * **Beam search on CPU** takes ~1–3 s per reply. Use greedy decoding in the
   sidebar if the lab machine is slow.
 * If Streamlit reports *"Port 8501 is already in use"*, run
-  `streamlit run app/app.py --server.port 8502`.
+  `streamlit run app.py --server.port 8502`.
 
 ---
 
